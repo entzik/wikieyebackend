@@ -76,6 +76,7 @@ public class KeywordsAnalyzer extends ListenerAdapter {
 			try {
 				for (String domain : Config.WIKI_DOMAINS) {
 					final Map<String, StringCount> collect = records.get(domain).tailMap(Instant.now().minus(1, ChronoUnit.HOURS)).values().stream()
+							.map(String::toLowerCase)
 							.map(word -> new StringCount(word, 1))
 							.collect(Collectors.toMap(StringCount::getWord, si -> si, (i, j) -> new StringCount(i.getWord(), i.getCount() + j.getCount())));
 					final List<StringCount> topWords = collect.values().stream().sorted((o1, o2) -> o2.getCount() - o1.getCount()).limit(10).collect(Collectors.toList());

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * Created by emilkirschner on 14/10/14.
  */
-public class MessageParser {
+class MessageParser {
 
     static final Pattern DEFAULT_PATTERN = Pattern.compile("\\[\\[([^:]+)\\]\\]\\s.?\\s(\\S+)\\s\\*\\s(.+)\\s\\*\\s.*");
 

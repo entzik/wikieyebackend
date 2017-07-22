@@ -38,33 +38,36 @@ public class WikiListener extends ListenerAdapter {
 			try {
 				setupThisBot();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("unable to start IRC bot", e);
 			}
 		});
 	}
 
 	@Async
 	private void setupThisBot() throws IOException {
+		final ListenerAdapter ircListener = new ListenerAdapter() {
+			@Override
+			public void onMessage(MessageEvent event) throws Exception {
+				Channel channel = event.getChannel();
+				String message = Colors.removeFormattingAndColors(event.getMessage());
+
+				String lang = channel.getName().substring(1, 3);
+				final WikiEvent wikiEvent = MessageParser.parseMessage(System.currentTimeMillis(), lang, message);
+
+				if (wikiEvent != null) {
+					eventBusSupport.postAsync(wikiEvent);
+				}
+			}
+		};
+
 		final Configuration.Builder builder = new Configuration.Builder()
 				.setName("wikimon") //Set the nick of the bot. CHANGE IN YOUR CODE
 				.setLogin("wikimon") //login part of hostmask, eg name:login@host
 				.setAutoNickChange(true) //Automatically change nick when the current one is in use
+				.setAutoReconnect(true)
 				.setCapEnabled(true) //Enable CAP features
 				.addCapHandler(new TLSCapHandler(new UtilSSLSocketFactory().trustAllCertificates(), true))
-				.addListener(new ListenerAdapter() {
-					@Override
-					public void onMessage(MessageEvent event) throws Exception {
-						Channel channel = event.getChannel();
-						String message = Colors.removeFormattingAndColors(event.getMessage());
-
-						String lang = channel.getName().substring(1, 3);
-						final WikiEvent wikiEvent = MessageParser.parseMessage(System.currentTimeMillis(), lang, message);
-
-						if (wikiEvent != null) {
-							eventBusSupport.postAsync(wikiEvent);
-						}
-					}
-				});
+				.addListener(ircListener);
 		builder.setServerHostname("irc.wikimedia.org");
 		for (String lang : Config.WIKI_DOMAINS)
 			builder.addAutoJoinChannel("#" + lang + ".wikipedia");
@@ -74,8 +77,7 @@ public class WikiListener extends ListenerAdapter {
 			PircBotX bot = new PircBotX(configuration);
 			bot.startBot();
 		} catch (IrcException e) {
-
+			LOGGER.error("unable to start IRC bot", e);
 		}
 	}
 }
-
