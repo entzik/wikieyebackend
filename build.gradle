@@ -1,15 +1,15 @@
 buildscript {
-	ext {
-		springBootVersion = '2.0.0.BUILD-SNAPSHOT'
-	}
-	repositories {
-		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    ext {
+        springBootVersion = '2.0.0.M4'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
 apply plugin: 'java'
@@ -17,26 +17,92 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'application'
 
+group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenCentral()
-	maven { url "https://repo.spring.io/snapshot" }
-	maven { url "https://repo.spring.io/milestone" }
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
 }
 
+
+ext {
+    springCloudVersion = 'Finchley.M2'
+}
 
 dependencies {
-	compile group: 'org.zalando.stups', name: 'spring-boot-starter-guava-eventbus', version: '0.5.4'
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-//	compile('org.springframework.boot:spring-boot-starter-data-cassandra-reactive')
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-webflux')
-	compile('org.springframework.boot:spring-boot-starter-websocket')
-	compile('org.pircbotx:pircbotx:2.0.1')
-	compile('io.dropwizard.metrics:metrics-core:3.1.0')
-	compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.0'
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile ('org.zalando.stups:spring-boot-starter-guava-eventbus:0.5.4')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    compile('org.springframework.cloud:spring-cloud-starter-hystrix')
+    compile('org.springframework.cloud:spring-cloud-starter-hystrix-dashboard')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile('org.springframework.boot:spring-boot-starter-websocket')
+    compile('org.pircbotx:pircbotx:2.0.1')
+    compile('io.dropwizard.metrics:metrics-core:3.1.0')
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.0'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
 }
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+mainClassName="com.thekirschners.wiki.analyzer.AnalyzerApplication"
+
+def dockerDir = new File(buildDir, 'docker-dir')
+def distribDir = new File(buildDir, "distributions")
+def distribDirName = project.name + '-boot-' + project.version;
+def distribFile = new File(distribDir, distribDirName + '.tar')
+
+
+tasks.create(name: 'docker-prepare') {
+    if (dockerDir.exists())
+        dockerDir.delete();
+    dockerDir.mkdirs()
+    doLast {
+        println 'preparing ....'
+    }
+}
+
+tasks.create(name: 'docker-copy-dockerfile', type: Copy) {
+    from(file('src/main/docker/Dockerfile'))
+    into(dockerDir)
+    filter(ReplaceTokens, tokens: [DISTRNAME: distribDirName])
+    mustRunAfter 'docker-prepare'
+    dependsOn 'docker-prepare'
+    doLast {
+        println 'generating dockerfile ....'
+    }
+}
+
+tasks.create(name: 'docker-copy-distribution', type: Copy) {
+    from(distribFile)
+    into(dockerDir)
+    dependsOn 'docker-copy-dockerfile'
+    doLast {
+        println 'copying distribution....'
+    }
+}
+
+tasks.create(name: 'docker-build-image', type: Exec) {
+    commandLine '/usr/local/bin/docker', 'build', '-t', 'entzik/' + project.name + ':' + project.version, dockerDir.getAbsolutePath()
+    commandLine '/usr/local/bin/docker', 'build', '-t', 'entzik/' + project.name + ':latest', dockerDir.getAbsolutePath()
+    dependsOn 'docker-copy-distribution'
+    doLast {
+        println 'building image....'
+    }
+}
+
+tasks.assemble.finalizedBy 'docker-build-image'
