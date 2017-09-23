@@ -48,7 +48,7 @@ public class KeywordsAnalyzer extends ListenerAdapter {
 				final String[] topics = sanitizeTopic(topic).split("\\s");
 				synchronized (records) {
 					for (String word : topics)
-						records.get(domain).put(now, word);
+						records.get(domain).put(now, sanitizeTopic(topic));
 				}
 			}
 		} catch (Exception e) {
