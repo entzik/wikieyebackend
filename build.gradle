@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.0.M4'
+        springBootVersion = '2.0.0.M3'
     }
     repositories {
         mavenCentral()
@@ -35,14 +35,14 @@ ext {
 }
 
 dependencies {
-    compile ('org.zalando.stups:spring-boot-starter-guava-eventbus:0.5.4')
     compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.cloud:spring-cloud-starter-eureka')
-    compile('org.springframework.cloud:spring-cloud-starter-hystrix')
-    compile('org.springframework.cloud:spring-cloud-starter-hystrix-dashboard')
+    compile('org.springframework.boot:spring-boot-autoconfigure:2.0.0.M3')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('org.springframework.boot:spring-boot-starter-websocket')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka-server')
+    compile ('org.zalando.stups:spring-boot-starter-guava-eventbus:0.5.4')
     compile('org.pircbotx:pircbotx:2.0.1')
     compile('io.dropwizard.metrics:metrics-core:3.1.0')
     compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.0'

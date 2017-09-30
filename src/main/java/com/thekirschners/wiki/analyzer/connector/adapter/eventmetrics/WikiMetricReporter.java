@@ -2,7 +2,7 @@ package com.thekirschners.wiki.analyzer.connector.adapter.eventmetrics;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
-import com.thekirschners.wiki.analyzer.connector.WikiMetric;
+import com.thekirschners.wiki.analyzer.domain.WikiMetric;
 import org.zalando.stups.boot.eventbus.EventBusSupport;
 
 import java.util.*;

@@ -1,8 +1,8 @@
 package com.thekirschners.wiki.analyzer.websocket;
 
 import com.google.common.eventbus.Subscribe;
-import com.thekirschners.wiki.analyzer.connector.WikiMetric;
-import com.thekirschners.wiki.analyzer.connector.adapter.keywords.TopWordsMetric;
+import com.thekirschners.wiki.analyzer.domain.WikiMetric;
+import com.thekirschners.wiki.analyzer.domain.TopWordsMetric;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,13 +18,13 @@ class MyTextWebSocketHandler extends TextWebSocketHandler {
 
 	@Subscribe
 	public void handleWikiMetric(WikiMetric wikiMetric) {
-		String payload = wikiMetric.toJSon();
+		String payload = wikiMetric.toJson();
 		broadcast(payload);
 	}
 
 	@Subscribe
 	public void handleTopWordMetric(TopWordsMetric topWordsMetric) {
-		String payload = topWordsMetric.toJSon();
+		String payload = topWordsMetric.toJson();
 		broadcast(payload);
 	}
 

@@ -3,6 +3,7 @@ package com.thekirschners.wiki.analyzer.connector.adapter.keywords;
 import com.google.common.eventbus.Subscribe;
 import com.thekirschners.wiki.analyzer.Config;
 import com.thekirschners.wiki.analyzer.connector.WikiEvent;
+import com.thekirschners.wiki.analyzer.domain.TopWordsMetric;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

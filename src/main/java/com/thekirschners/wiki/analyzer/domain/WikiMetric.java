@@ -1,5 +1,9 @@
-package com.thekirschners.wiki.analyzer.connector;
+package com.thekirschners.wiki.analyzer.domain;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.thekirschners.wiki.analyzer.domain.JsonSerialized;
 
 import java.util.Formatter;
 
@@ -8,10 +12,15 @@ import static java.lang.StrictMath.round;
 /**
  * Created by emilkirschner on 03/11/15.
  */
-public class WikiMetric {
+@JsonTypeName("update-event")
+public class WikiMetric implements JsonSerialized {
+    @JsonProperty("timestamp")
     private final long timestamp;
+    @JsonProperty("domain")
     private final String domain;
+    @JsonProperty("action")
     private final String action;
+    @JsonProperty("sec-rate")
     private final double secRate;
 
     public WikiMetric(long timestamp, String domain, String action, double secRate) {
@@ -37,7 +46,7 @@ public class WikiMetric {
         return secRate;
     }
 
-    public String toJSon() {
+    public String toJson() {
         StringBuilder sb = new StringBuilder();
         Formatter fmt = new Formatter(sb);
         fmt.format("{\"@msg-type\": \"wiki-metric\", \"timestamp\": %d, \"domain\": \"%s\", \"action\": \"%s\", \"sec-rate\": %f}", timestamp, domain, action, (double)round(secRate));
